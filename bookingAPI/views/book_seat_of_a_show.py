@@ -28,16 +28,25 @@ class BookSeatOfAShow(APIView):
         seat = sepk
         if show != 0 and seat != 0:
 
-            queryset = Show.objects.filter(pk = shpk)
+            queryset_show = Show.objects.filter(pk = shpk)
+            queryset_seat = Seat.objects.filter(pk = sepk)
+
+            if len(queryset_seat) == 0 or len(queryset_show) == 0:
+                return Response(data="Bad Request seat invalid or Show invalid", status=status.HTTP_400_BAD_REQUEST)
+
+            if (queryset_seat[0].hall.id != queryset_show[0].hall.id):
+                print("Bad Requst")
+                return Response(data = "Bad Request seat not in show", status=status.HTTP_400_BAD_REQUEST)
 
             user_id = request.user.id
             payload=dict()
 
+
             payload["show"] = shpk
-            payload["cinema"] = queryset[0].cinema.id
+            payload["cinema"] = queryset_show[0].cinema.id
             payload["seat"] = sepk
-            payload["movie"] = queryset[0].movie.id
-            payload["hall"] = queryset[0].hall.id
+            payload["movie"] = queryset_show[0].movie.id
+            payload["hall"] = queryset_show[0].hall.id
             payload["user"] = user_id
             payload["confirmed"] = False
 
