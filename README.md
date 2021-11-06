@@ -18,3 +18,4 @@
 ---
 
 This project only implements the backend APIs.
+The postman collection file is also included for testing
