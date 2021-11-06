@@ -40,6 +40,7 @@ class Show(models.Model):
     cinema = models.ForeignKey(Cinema,on_delete=CASCADE)
 
 class Booking(models.Model):
+    confirmed = models.BooleanField(verbose_name="Is Booking confirmed")
     seat = models.ForeignKey(Seat,on_delete=CASCADE)
     show = models.ForeignKey(Show,on_delete=CASCADE)
     movie = models.ForeignKey(Movie,on_delete=CASCADE)

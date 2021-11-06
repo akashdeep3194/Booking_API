@@ -32,13 +32,31 @@ class BookSeatOfAShow(APIView):
             payload["movie"] = queryset[0].movie.id
             payload["hall"] = queryset[0].hall.id
             payload["user"] = 1
+            payload["confirmed"] = False
 
             show_booking = Booking.objects.filter(show=shpk,seat=sepk)
-            if len(show_booking) == 0:            
+            if len(show_booking) == 0:
                 serialized_payload = BookingSerializer(data = payload)
+                
                 if serialized_payload.is_valid():
                     serialized_payload.save()
-                    return Response(data = serialized_payload.data, status = status.HTTP_200_OK)
+                    # call payment service
+                
+                    is_payment_done = False
+
+                    if is_payment_done == True:
+                        show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
+                        payload_final = dict()
+                        payload_final["confirmed"] = True
+                        serialized_payload_final  = BookingSerializer(show_booking_final, data=payload)
+                        if serialized_payload_final.is_valid():
+                            return Response(data=serialized_payload_final.data, status = status.HTTP_201_CREATED)
+                        else:
+                            return Response(data = serialized_payload_final.errors,status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
+                        show_booking_final.delete()
+                        return Response(data = "Payment Failed!",status=status.HTTP_409_CONFLICT)
                 else:
                     return Response(data="something went wrong", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
