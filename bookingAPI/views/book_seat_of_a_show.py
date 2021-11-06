@@ -13,6 +13,8 @@ from bookingAPI.Serializers.shows_serializer import ShowsSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+import random
+
 
 # Create your views here.
 
@@ -39,26 +41,34 @@ class BookSeatOfAShow(APIView):
             payload["user"] = user_id
             payload["confirmed"] = False
 
-            print(shpk,sepk)
 
             show_booking = Booking.objects.filter(show=shpk,seat=sepk)
             if len(show_booking) == 0:
                 serialized_payload = BookingSerializer(data = payload)
                 
                 if serialized_payload.is_valid():
+
+                    # Block a booking till payment is made successfully
                     serialized_payload.save()
-                    # call payment service
-                
-                    is_payment_done = True
                     
+
+                    # call payment service and store result in is_payment_done
+
+
+                    #Simulating a payment scenario that may fail as well
+
+                    list_bool = [True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,]
+                    is_payment_done = random.choice(list_bool) 
+
+                    # 15/16 times payment would be successful 1/16 times payment would be unsuccessful
+
                     if is_payment_done == True:
-                        show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
+
                         payload["confirmed"] = True
-                        print(payload)
+                        show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
                         serialized_payload_final  = BookingSerializer(show_booking_final[0], data=payload)
                         if serialized_payload_final.is_valid():
                             serialized_payload_final.save()
-                            print("\n\n\n",serialized_payload_final.data)
                             return Response(data=serialized_payload_final.data, status = status.HTTP_201_CREATED)
                         else:
                             return Response(data = serialized_payload_final.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -71,6 +81,8 @@ class BookSeatOfAShow(APIView):
                     return Response(data="something went wrong", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 response_data = BookingSerializer(show_booking, many = True)
+                for ele in response_data.data:
+                    ele.pop("user") # Remove user details from booking information
                 return Response(data = ["Seat is already booked"] + response_data.data , status=status.HTTP_409_CONFLICT)
 
         else:

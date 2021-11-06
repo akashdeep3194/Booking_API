@@ -1,5 +1,6 @@
 from django.urls import path
 from bookingAPI.views.all_avl_seats_of_show import AllSeatsofAShow
+from bookingAPI.views.all_bookings_of_a_user import AllBookingsOfAUser
 from bookingAPI.views.all_shows_of_movie import ShowsOfMovieInCity
 from bookingAPI.views.book_seat_of_a_show import BookSeatOfAShow
 from bookingAPI.views.get_cinemas_in_city_view import CinemasInCity, ShowsInCinemas
@@ -16,6 +17,8 @@ urlpatterns = [
     path('city/<int:cpk>/movie/<int:mpk>/',ShowsOfMovieInCity.as_view(),name="Shows in city"),    
     path('show/<int:spk>/avlseats/',AllSeatsofAShow.as_view(),name="All seats of a show"),   
     path('book/show/<int:shpk>/seat/<int:sepk>',BookSeatOfAShow.as_view(),name="Book seat of a show"),   
+    path('bookings/',AllBookingsOfAUser.as_view(),name="Get All Bookings of a user"),   
+
     path('signup/',RegisterView.as_view(),name="Register New User"),   
     path('auth-token/',views.obtain_auth_token,name="get auth-token"),   
 
