@@ -10,11 +10,16 @@ from bookingAPI.Serializers.seats_serializer import SeatsSerializer
 
 from bookingAPI.models.booking_models import Booking,Cinema, City,Movie,Hall,Seat,Show
 from bookingAPI.Serializers.shows_serializer import ShowsSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 # Create your views here.
 
 class BookSeatOfAShow(APIView):
-    
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self,request:Request,shpk=0,sepk=0):
 
         show = shpk
@@ -31,8 +36,10 @@ class BookSeatOfAShow(APIView):
             payload["seat"] = sepk
             payload["movie"] = queryset[0].movie.id
             payload["hall"] = queryset[0].hall.id
-            payload["user"] = 1
+            payload["user"] = user_id
             payload["confirmed"] = False
+
+            print(shpk,sepk)
 
             show_booking = Booking.objects.filter(show=shpk,seat=sepk)
             if len(show_booking) == 0:
@@ -42,20 +49,23 @@ class BookSeatOfAShow(APIView):
                     serialized_payload.save()
                     # call payment service
                 
-                    is_payment_done = False
-
+                    is_payment_done = True
+                    
                     if is_payment_done == True:
                         show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
-                        payload_final = dict()
-                        payload_final["confirmed"] = True
-                        serialized_payload_final  = BookingSerializer(show_booking_final, data=payload)
+                        payload["confirmed"] = True
+                        print(payload)
+                        serialized_payload_final  = BookingSerializer(show_booking_final[0], data=payload)
                         if serialized_payload_final.is_valid():
+                            serialized_payload_final.save()
+                            print("\n\n\n",serialized_payload_final.data)
                             return Response(data=serialized_payload_final.data, status = status.HTTP_201_CREATED)
                         else:
                             return Response(data = serialized_payload_final.errors,status=status.HTTP_400_BAD_REQUEST)
                     else:
                         show_booking_final = Booking.objects.filter(show=shpk,seat=sepk)
                         show_booking_final.delete()
+                        show_booking.delete()
                         return Response(data = "Payment Failed!",status=status.HTTP_409_CONFLICT)
                 else:
                     return Response(data="something went wrong", status=status.HTTP_500_INTERNAL_SERVER_ERROR)

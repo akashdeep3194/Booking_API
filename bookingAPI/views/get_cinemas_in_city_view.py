@@ -30,9 +30,8 @@ class CinemasInCity(APIView):
 class ShowsInCinemas(APIView):
     
     def get(self,request:Request,pk=0,cpk=0):
-        city = pk
         cinema = cpk
-        if city != 0 and cinema != 0:
+        if cinema != 0:
             queryset = get_list_or_404(Show,cinema=cinema)
             response_data = ShowsSerializer(queryset,many = True)
             return Response(data = response_data.data, status = status.HTTP_200_OK)
