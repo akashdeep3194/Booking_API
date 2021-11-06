@@ -31,7 +31,7 @@ class AllSeatsofAShow(APIView):
             #     print(each_booking.seat.id)
             #     seat_id_list.append(each_booking.seat.id)
             # qss = Seat.objects.exclude(id__in = seat_id_list).filter(hall=hid)
-            qss2 = Seat.objects.filter(hall=hid).exclude(booking__show=spk)
+            qss2 = Seat.objects.filter(hall=hid).exclude(booking__show=spk, booking__confirmed = False)
             movie_name = qshow.movie.movie_name
             print(movie_name)
             response_data = SeatsSerializer(qss2,context = {"show":spk, "movie":movie_name},many = True)
