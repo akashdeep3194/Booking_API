@@ -19,3 +19,4 @@
 
 This project only implements the backend APIs.
 The postman collection file is also included for testing
+![ERD](https://user-images.githubusercontent.com/20772898/141683239-522a7537-7ffe-491e-9c78-758279b89536.png)
